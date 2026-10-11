@@ -8,7 +8,7 @@ import 'package:share_plus/share_plus.dart';
 // ==============================================================
 // 1. CONFIGURATION
 // ==============================================================
-const String GEMINI_API_KEY = "AQ.Ab8RN6JFc3skZ3wi5WMU3Q2dFSKW5EqKh7icy4AkwESEAjUuQwE";
+const String GEMINI_API_KEY = "AQ.Ab8RN6I8UutxmNCwOiwWP59bOChxjAxvP_-7DOeli7awPJwDJQ";
 
 // Aapka 6-Digit Master Activation PIN (Ise badal sakte hain)
 const String MASTER_ACTIVATION_PIN = "571990"; 
