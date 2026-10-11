@@ -27,18 +27,33 @@ jobs:
 
       - name: Clean and Recreate Fresh Android Folder
         run: |
-          # Purana corrupted android folder git workspace se complete clean karein
           rm -rf android
-          # Fresh standard Android architecture banayein
           flutter create . --org com.example --project-name vakil_sahab_app --platforms android
 
-      - name: Inject Permissions and MinSdk
+      - name: Configure Android & Fix Duplicate Classes
         run: |
-          # Microphone aur Internet permissions inject karein
+          # 1. Microphone aur Internet permissions inject karein
           sed -i '/<application/i \    <uses-permission android:name="android.permission.RECORD_AUDIO"/>\n    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
-          # speech_to_text package requirement (minSdkVersion 21) set karein
+          
+          # 2. minSdkVersion ko 21 set karein
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
+
+          # 3. Duplicate Kotlin JDK7/JDK8 classes conflict fix karein
+          cat << 'EOF' >> android/app/build.gradle
+
+          configurations.all {
+              resolutionStrategy {
+                  eachDependency { details ->
+                      if (details.requested.group == 'org.jetbrains.kotlin') {
+                          if (details.requested.name.startsWith('kotlin-stdlib-jdk')) {
+                              details.useTarget 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+                          }
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: Get Dependencies
         run: flutter pub get
