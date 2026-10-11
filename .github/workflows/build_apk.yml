@@ -21,36 +21,22 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.22.2'
           channel: 'stable'
 
-      - name: Generate Android Project
+      - name: Recreate Clean Android Structure
         run: |
           rm -rf android
           flutter create . --org com.example --project-name vakil_sahab_app --platforms android
 
-      - name: Fix Legacy Gradle Plugin Compatibility
+      - name: Configure Permissions and MinSdk
         run: |
-          # 1. Microphone aur Internet permissions inject karein
+          # Permissions add karein
           sed -i '/<application/i \    <uses-permission android:name="android.permission.RECORD_AUDIO"/>\n    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
           
-          # 2. Subprojects ke liye compileSdk 34 aur minSdk 21 inject karein taaki legacy plugins crash na karein
-          cat << 'EOF' >> android/build.gradle
-
-          subprojects {
-              afterEvaluate { project ->
-                  if (project.hasProperty('android')) {
-                      project.android {
-                          compileSdkVersion 34
-                          defaultConfig {
-                              minSdkVersion 21
-                              targetSdkVersion 34
-                          }
-                      }
-                  }
-              }
-          }
-          EOF
+          # minSdkVersion ko 21 set karein
+          sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
 
       - name: Install Dependencies
         run: flutter pub get
