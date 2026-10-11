@@ -10,35 +10,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Flutter
+      - name: Set up Flutter 3.22.2
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
           channel: 'stable'
 
-      - name: Recreate Clean Android Structure
+      - name: Clean and Recreate Fresh Android Folder
         run: |
+          # Purana corrupted android folder git workspace se complete clean karein
           rm -rf android
+          # Fresh standard Android architecture banayein
           flutter create . --org com.example --project-name vakil_sahab_app --platforms android
 
-      - name: Configure Permissions and MinSdk
+      - name: Inject Permissions and MinSdk
         run: |
-          # Permissions add karein
+          # Microphone aur Internet permissions inject karein
           sed -i '/<application/i \    <uses-permission android:name="android.permission.RECORD_AUDIO"/>\n    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
-          
-          # minSdkVersion ko 21 set karein
+          # speech_to_text package requirement (minSdkVersion 21) set karein
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
 
-      - name: Install Dependencies
+      - name: Get Dependencies
         run: flutter pub get
 
       - name: Build Release APK
